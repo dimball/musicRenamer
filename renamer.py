@@ -4,10 +4,24 @@ import os
 class c_Rename():
     def __init__(self):
         self.run()
+    def RenameDirectory(self, dir):
+        self.dir = dir
+        self.dir = self.dir.replace("'", "")
+        self.dir = self.dir.replace(".", "")
+        self.dir = self.dir.replace("&", "and")
+        return self.dir
+
     def run(self):
         self.rootDir = 'z:/complete'
         for dirName, subdirList, fileList in os.walk(self.rootDir):
-            print('Found directory: %s' % dirName)
+
+            self.dir = dirName
+
+
+            print('Found directory: %s' % self.RenameDirectory(self.dir))
+            #rename the directory too
+
+
             for fname in fileList:
 
 
@@ -61,7 +75,7 @@ class c_Rename():
 
                     if self.bRenameIt:
                         print(fname + " ==> " + self.CurrentFile)
-                        print("testing")
+
 
 
 
