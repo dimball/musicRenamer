@@ -1,5 +1,7 @@
 __author__ = 'hng'
 import os
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 class c_Rename():
     def __init__(self):
@@ -9,16 +11,20 @@ class c_Rename():
         self.dir = self.dir.replace("'", "")
         self.dir = self.dir.replace(".", "")
         self.dir = self.dir.replace("&", "and")
+        self.dir = self.dir.replace(" (Unprocessed)", "")
+        self.dir = self.dir.replace("_", "")
+        self.dir = self.dir.replace("!", "")
+        os.rename(dir, self.dir)
         return self.dir
 
     def run(self):
-        self.rootDir = 'z:/complete'
+        self.rootDir = 'U:\mp3\Various Artists'
         for dirName, subdirList, fileList in os.walk(self.rootDir):
 
             self.dir = dirName
 
 
-            print('Found directory: %s' % self.RenameDirectory(self.dir))
+            #print('Found directory: %s' % self.RenameDirectory(self.dir))
             #rename the directory too
 
 
@@ -33,7 +39,7 @@ class c_Rename():
                     try:
                         self.tracknumber = int(self.TrackNumber)
                     except:
-                        print("File does not have a tracknumber")
+                        logging.debug("File does not have a tracknumber,%s", fname)
                         continue
 
 
@@ -45,36 +51,46 @@ class c_Rename():
                     if self.CurrentFile.find("_")>-1:
                         self.CurrentFile = self.CurrentFile.replace("_", "")
                         self.bRenameIt = True
-
-                    if self.CurrentFile[3] != "-":
-                        #print("file does not have a dash")
-                        self.TrackNumber = fname[:2]
-                        self.rest = fname[2:]
-                        self.CurrentFile = (self.TrackNumber + " -" + self.rest)
-                        # self.TrackName = fname.split("-")[2][1:]
+                    if self.CurrentFile.find("+")>-1:
+                        self.CurrentFile = self.CurrentFile.replace("+", "and")
+                        self.bRenameIt = True
+                    if self.CurrentFile.find(",")>-1:
+                        self.CurrentFile = self.CurrentFile.replace(",", "")
+                        self.bRenameIt = True
+                    if self.CurrentFile.find("!")>-1:
+                        self.CurrentFile = self.CurrentFile.replace("!", "")
                         self.bRenameIt = True
 
                     if self.CurrentFile.find("&")>-1:
                         self.CurrentFile = self.CurrentFile.replace("&", "and")
                         self.bRenameIt = True
 
-                    self.tokens = self.CurrentFile.split(".")
-                    if len(self.tokens) > 2:
+                    self.tokens = self.head.split(".")
+                    if len(self.tokens) > 1:
                         self.bRenameIt = True
-                        self.extension = self.tokens[len(self.tokens)]
-                        self.newName = ""
-                        for i in range(len(self.tokens)-1):
-                            if i < len(self.tokens)-2:
-                                self.newName += self.tokens[i] + " "
-                            else:
-                                self.newName += self.tokens[i]
+                        self.CurrentFile = self.head.replace(".","")
+                        self.CurrentFile += self.tail
 
-                        self.CurrentFile = self.newName
-
-
+                    if self.CurrentFile[3] != "-":
+                        #print("file does not have a dash")
+                        self.TrackNumber = self.CurrentFile[:2]
+                        self.rest = self.CurrentFile[2:]
+                        self.CurrentFile = (self.TrackNumber + " -" + self.rest)
+                        # self.TrackName = fname.split("-")[2][1:]
+                        self.bRenameIt = True
 
                     if self.bRenameIt:
-                        print(fname + " ==> " + self.CurrentFile)
+                        try:
+                            logging.debug(self.dir)
+                            logging.debug("%s ==> %s", self.dir + "/" + fname, self.dir + "/" + self.CurrentFile)
+                        except:
+                            logging.debug("something went wrong")
+
+                        if os.path.exists(self.dir + "/" + self.CurrentFile):
+                            os.remove(self.dir + "/" + self.CurrentFile)
+
+                        os.rename(self.dir + "/" + fname, self.dir + "/" + self.CurrentFile)
+
 
 
 
@@ -89,7 +105,7 @@ class c_Rename():
             #     self.TrackName = fname.split("-")[2][1:]
             #
             #     self.newTrackName = (dirName + "/" + self.TrackNumber + " - " + self.TrackName)
-            #     #os.rename(dirName + "/" + fname, self.newTrackName )
+
             #     #print("renamed :" + dirName + "/" + fname + " ==> " +  self.newTrackName)
 
 main = c_Rename()
